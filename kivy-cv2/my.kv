@@ -1,0 +1,31 @@
+WindowManager:
+    MainWindow:
+    SecondWindow:
+
+<MainWindow>:
+    name: "main"
+
+    GridLayout:
+        cols:1
+
+        Button:
+            text: "Welcome to FaceTracker built on cv2"
+        GridLayout:
+            cols: 2
+
+            Label:
+                text: "Turn on Camera? "
+
+            TextInput:
+                id: pswd
+                multiline: False
+
+        Button:
+            text: "Submit"
+            on_release:
+                app.root.current = "second" if pswd.text == "yes" else "main"
+                root.manager.transition.direction = "left"
+
+<SecondWindow>:
+    name: "second"
+    CustomGrid:

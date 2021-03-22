@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Implemention of a REST API| for our function which itself fetch data from the
-OSM and do some calculation based on Flask.
+A custom navigation app in REST API fashion. It usage OpenTripPlanner's API to fetch the
+data with the help of rasta. You can also use map view.
 """
 import sys
 
