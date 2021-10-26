@@ -1,0 +1,10 @@
+pytest
+pathlib
+pandas
+requests
+joblib
+pandas
+matplotlib
+seaborn
+scikit-learn
+jupyter-notebook
