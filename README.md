@@ -8,3 +8,5 @@ Some use-case examples to serve as a documentation.
 4. **valhalla-python**: Valhalla is a great opensource & multimodal routing engine. It offers several API ranging from navigation to map-matching. One can find about it from its [documentation](https://valhalla.readthedocs.io/en/latest/ "documentation").
 	a. **map_matching_meli_valhalla.ipynb** is a notebook to shows the map matching. Map matching is a process by which we match raw GPS points to actual map. One of the library in Valhalla, called Meili does this part. To use this notebook, one needs to have running server for Valhalla. A complete documentation about setting up Valhalla and Meili can be found [on my blog page](map_matching_meli_valhalla.ipynb "here").
 	b. YetToBeDecided
+5. **data-science**: This example is for a sample data analytics cum machine learning task for a time-series data related to bike rental.
+6. **youtube**: Using YouTube API to scrap some analytics and thumbnails. Not the best implementation as not directly using YouTube's official client.
