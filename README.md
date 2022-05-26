@@ -10,3 +10,4 @@ Some use-case examples to serve as a documentation.
 	b. YetToBeDecided
 5. **data-science**: This example is for a sample data analytics cum machine learning task for a time-series data related to bike rental.
 6. **youtube**: Using YouTube API to scrap some analytics and thumbnails. Not the best implementation as not directly using YouTube's official client.
+7. **firebase-python**: Trials with the firebase's Realtime database where I add local system info to the database with `pyrebase` module. More information is documented [here](https://ikespand.github.io/posts/firebase/).
