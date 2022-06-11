@@ -64,6 +64,8 @@ def sys_info():
     info["ram_usage"] = psutil.virtual_memory()[2]
     info["cpu_usage"] = psutil.cpu_percent()
     info["disk_usage"] = disc_usage[1]/disc_usage[0]*100
+    # Firebase doesn't support list and during the addition will convert to key-value pair
+    info["sample_list"] = [1, 2, 3, 4, 5, 6]
     return info 
 
 
@@ -161,8 +163,8 @@ class SystemDataFirebaseRt():
 
         """
         val = self.db.child().get()
-        print(val.val())
-
+        # print(val.val())
+        return val.val()
 # %%
 
 if __name__ == "__main__":
@@ -177,5 +179,9 @@ if __name__ == "__main__":
         time.sleep(2)
         ctr+=1
     print("Done!")
+    
+    # Retrive the data from the list
+    first_sample_list =  list(fb.get_all_data()["DESKTOP-M3PCI07"].items())[0][1]["sample_list"]
+    _ = [print(l) for l in first_sample_list]
 
 
