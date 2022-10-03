@@ -10,4 +10,5 @@ Some use-case examples to serve as a documentation.
 	b. Make a request, if a user, you need something.
 5. **data-science**: This example is for a sample data analytics cum machine learning task for a time-series data related to bike rental.
 6. **youtube**: Using YouTube API to scrap some analytics and thumbnails. Not the best implementation as not directly using YouTube's official client.
-7. **ds-stockmarket**: A notebook where we predict the opening price of a stock using its past values. Here, LSTM and ESN are compared. This correspond to [this blog](https://ikespand.github.io/posts/ml-for-stock-market-1/). 
+7. **firebase-python**: Trials with the firebase's Realtime database where I add local system info to the database with `pyrebase` module. More information is documented [here](https://ikespand.github.io/posts/firebase/).
+8. **ds-stockmarket**: A notebook where we predict the opening price of a stock using its past values. Here, LSTM and ESN are compared. This correspond to [this blog](https://ikespand.github.io/posts/ml-for-stock-market-1/). 
