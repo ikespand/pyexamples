@@ -1,0 +1,6 @@
+yfinance
+pandas_datareader
+pandas
+easyesn
+tensorflow
+matplotlib
