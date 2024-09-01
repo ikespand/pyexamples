@@ -19,13 +19,48 @@ import time
 import random
 import cloudscraper
 import pywhatkit
+import re
 
 StreamHandler(sys.stdout).push_application()
 log = Logger('OktoBus')
 
-numbers=["+12345697890xav"] # List of WhatsApp numbers for notification.
+numbers=["+123456789"] # List of WhatsApp numbers for notification.
 
+
+# Function to extract relevant information
+def extract_info(entry):
+    lines = entry.split("\n")
+    lines = [line.strip() for line in lines if line.strip()]
+    
+    zelt = ""
+    date_full = ""
+    tod = ""
+    date = ""
+    time = ""
+    totalperson = ""
+    totalcost = ""
+    
+    for i, line in enumerate(lines):
+        if "Festzelt" in line:
+            zelt = line
+        elif re.match(r'\w+,\s\d{2}\.\d{2}\.\d{4}', line):
+            date_full = line
+            # Extract date without the day of the week
+            date = re.search(r'\d{2}\.\d{2}\.\d{4}', date_full).group(0)
+        elif line in ["Vormittag", "Mittag", "Nachmittag", "Abend"]:
+            tod = line
+        elif re.match(r'\d{2}:\d{2}-\d{2}:\d{2}', line):
+            time = line + " Uhr"
+        elif "Personen" in line:
+            totalperson = line
+        elif "Summe" in line:
+            totalcost = lines[i + 1].replace("€\xa0", "€ ").strip()
+
+    return zelt, date, tod, time, totalperson, totalcost
+
+    
 def check_availability(query_date:str, query_tod:str):
+    """Function to check availability for a date and ToD"""
     scraper = cloudscraper.create_scraper(browser={'browser': 'firefox','platform': 'windows','mobile': False})
     url = r"https://www.oktoberfest-booking.com/de/reseller-angebote"
     resp = scraper.get(url)
@@ -34,19 +69,23 @@ def check_availability(query_date:str, query_tod:str):
     #resp = requests.get(url, headers=header)
     if resp.status_code == 200:
         S = BeautifulSoup(resp.text, "lxml")
-        poi = S.find_all("span", class_="tw-font-normal")
-        _kaufen = S.find_all("button", class_= "md:tw-max-w-[192px]")
-        _kaufen = [i.text.strip() for i in _kaufen]
+   
+
+        poi = S.find_all("div", class_="tw-w-full")
+        #_kaufen = S.find_all("button", class_= "md:tw-max-w-[192px]")
+        #_kaufen = [i.text.strip() for i in _kaufen]
 
         unwind=[]
         for date in poi:
             unwind.append(date.text)
-            
-        df = pd.DataFrame()
-        df["date"]= unwind[0:-1:4]
-        df["tod"]=unwind[1:-1:4]
-        df["person"]=unwind[2:-1:4]
-        #df["status"] = kaufen
+        
+        filtered_list = list(filter(None, unwind))
+        # TODO: Structure can change then following might not work!
+        filtered_list1 = filtered_list[::8]
+        extracted_data = [extract_info(entry) for entry in filtered_list1]        
+        df = pd.DataFrame(extracted_data, columns=["zelt", "date", "tod", "time", "person", "totalcost"])
+        # print(df)
+       
         for id, row in df.iterrows():
             if query_date == row["date"]:
                 #log.info(f"Found one on query date {row['date']} for time {row['tod']}")
@@ -81,7 +120,7 @@ def send_whatsapp_message(numbers:list, msg: str):
             pywhatkit.sendwhatmsg_instantly(
                 phone_no=num,
                 message=msg,
-                wait_time=random.randint(7,15),
+                wait_time=random.randint(25,35),
                 tab_close=True
                 
             )
@@ -90,7 +129,7 @@ def send_whatsapp_message(numbers:list, msg: str):
            
 # %%
 if __name__ == "__main__":
-    my_date = "30.09.2023"
+    my_date = "01.10.2024"
     my_time = "Abend"
     print(f"STARTING TO QUERY FOR {my_date} and {my_time}")
     success = find_slot(query_date=my_date, query_tod= my_time,time_sleep = 100)

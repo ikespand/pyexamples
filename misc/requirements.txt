@@ -1,0 +1,6 @@
+logbook
+pandas
+bs4
+cloudscraper
+pywhatkit
+lxml
