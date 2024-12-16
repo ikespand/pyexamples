@@ -1,0 +1,5 @@
+.ipynb_checkpoints
+__pycache__
+ngrok.exe
+.DS_Store
+*.csv
