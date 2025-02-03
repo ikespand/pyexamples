@@ -13,3 +13,5 @@ Some use-case examples to serve as a documentation.
 7. **firebase-python**: Trials with the firebase's Realtime database where I add local system info to the database with `pyrebase` module. More information is documented [here](https://ikespand.github.io/posts/firebase/).
 8. **ds-stockmarket**: A notebook where we predict the opening price of a stock using its past values. Here, LSTM and ESN are compared. This correspond to [this blog](https://ikespand.github.io/posts/ml-for-stock-market-1/). 
 9. **passport-ocr**: A full application to find out the machine readable zone from passport and similar document. It then can also decode the necessary information. It usage existing opensource libraries, therefore, it has scope of fine-tuning. FastAPI based REST API service is also available to serve apps or UIs.
+10. **oktoberfest_findATable**: Example code to find some attributes from an HTML and notify on WhatsApp if some conditions are met. Here an example of finding an empty table at Oktoberfest (2024 format).
+11. **a2d2**: Exploration notebook for A2D2 data for autonomous driving use-case (limited to images and gps).
