@@ -6,3 +6,4 @@ tensorflow
 matplotlib
 backtesting
 talib
+pandas_ta

@@ -3,21 +3,42 @@ import numpy as np
 import dill as pickle
 from sklearn.preprocessing import MinMaxScaler
 
-def get_stock_data(ticker="NVDA", interval="1d", start="2022-01-01", end="2024-03-01"):
+import yfinance as yf
+import pandas as pd
+
+def get_stock_data(ticker="NVDA", interval="1d", start=None, end=None, period=None):
     """
-    Fetch stock data for any ticker and candle interval.
-    
-    :param ticker: Stock symbol (e.g., "NVDA", "AAPL", "MSFT")
-    :param interval: Candle timeframe (e.g., "1d", "1h", "15m")
-    :param start: Start date for historical data
-    :param end: End date for historical data
-    :return: Cleaned stock DataFrame
+    Fetch stock data with support for period or start/end dates.
+
+    :param ticker: Stock symbol (e.g., "NVDA")
+    :param interval: Candle interval (e.g., "1d", "1h", "15m", "5m")
+    :param start: Start date (e.g., "2023-01-01")
+    :param end: End date (e.g., "2024-01-01")
+    :param period: Period string (e.g., "30d", "60d", "1y"). Overrides start/end.
+    :return: Clean OHLCV DataFrame
     """
-    df = yfinance.download(ticker, interval=interval, start=start, end=end)
-    
-    df = df[['Open', 'High', 'Low', 'Close', 'Volume']].copy()
+    # Intraday limit check
+    intraday_intervals = ["1m", "2m", "5m", "15m", "30m", "60m", "90m"]
+    if interval in intraday_intervals and not period:
+        # yfinance supports max 60 days for 5m/15m intervals
+        period = "30d"  # default fallback
+
+    # Fetch data
+    if period:
+        df = yf.download(ticker, interval=interval, period=period, progress=False)
+    else:
+        df = yf.download(ticker, interval=interval, start=start, end=end, progress=False)
+
+    # Clean and standardize
+    if df.empty:
+        raise ValueError(f"No data returned for {ticker} with interval {interval}")
+
+    df = df[["Open", "High", "Low", "Close", "Volume"]].copy()
+    df.dropna(inplace=True)
     df.columns = ["Open", "High", "Low", "Close", "Volume"]
+
     return df
+
 
 #%% 
 class StockPricePredictor:
