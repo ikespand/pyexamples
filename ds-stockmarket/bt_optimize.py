@@ -6,7 +6,7 @@ from backtesting import Backtest, Strategy
 from backtesting.lib import crossover
 from backtesting.test import SMA, GOOG
 import talib 
-from bt_utils import get_stock_data
+from utils import get_stock_data
 
 def optimize_profit_with_limited_trades(stats):
     """
@@ -32,49 +32,60 @@ def optimize_profit_per_trade(stats):
     trade_count = stats.get("# Trades", 1)  # Avoid division by zero
     return profit / trade_count
 
-
-class RsiSmaStrategy(Strategy):
-    short_window = 10  # Short-term SMA
-    long_window = 20   # Long-term SMA
-    rsi_period = 14    # RSI period
-    rsi_buy = 30       # RSI oversold threshold
-    rsi_sell = 70      # RSI overbought threshold
-    stop_loss_pct = 0.02  # 2% stop-loss
-    take_profit_pct = 0.05  # 5% take-profit
+class RsiWmaBollingerStrategy(Strategy):
+    rsi_period = 14
+    rsi_buy = 30
+    rsi_sell = 70
+    bb_period = 20
+    bb_std = 2
+    stop_loss_pct = 0.02
+    take_profit_pct = 0.05
 
     def init(self):
-        # Compute SMAs
-        self.sma_short = self.I(SMA, self.data.Close, self.short_window)
-        self.sma_long = self.I(SMA, self.data.Close, self.long_window)
-        # Compute RSI using TA-Lib
-        self.rsi = self.I(talib.RSI, self.data.Close, self.rsi_period)
+        close = self.data.Close
+
+        # Use TA-Lib for all indicators (multiprocessing safe)
+        self.rsi = talib.RSI(close, timeperiod=self.rsi_period)
+        self.wma = talib.WMA(close, timeperiod=self.bb_period)
+        self.std = pd.Series(close).rolling(self.bb_period).std().values
+
+        self.bb_upper = self.wma + self.bb_std * self.std
+        self.bb_lower = self.wma - self.bb_std * self.std
 
     def next(self):
-        # Entry Condition: RSI below 30 & SMA crossover
-        if self.rsi[-1] < self.rsi_buy and crossover(self.sma_short, self.sma_long):
-            price = self.data.Close[-1]
-            sl = price * (1 - self.stop_loss_pct)  # Stop-Loss 2% below entry
-            tp = price * (1 + self.take_profit_pct)  # Take-Profit 5% above entry
-            self.buy(sl=sl, tp=tp)  # Place order with SL & TP
+        i = len(self.data.Close) - 1
+        price = self.data.Close[i]
 
-        # Exit Condition: RSI above 70 OR SMA crossover in opposite direction
-        elif self.rsi[-1] > self.rsi_sell or crossover(self.sma_long, self.sma_short):
-            self.position.close()
+        # Handle edge cases
+        if np.isnan(self.rsi[i]) or np.isnan(self.bb_lower[i]) or np.isnan(self.bb_upper[i]):
+            return
+
+        if self.rsi[i] < self.rsi_buy and price < self.bb_lower[i]:
+            sl = price * (1 - self.stop_loss_pct)
+            tp = price * (1 + self.take_profit_pct)
+            self.buy(sl=sl, tp=tp)
+
+        elif self.position:
+            if self.rsi[i] > self.rsi_sell or price > self.bb_upper[i]:
+                self.position.close()
+
 
 if __name__ == "__main__":
     # Load sample data
-    df = get_stock_data("QCOM", interval="1d")
+    df = get_stock_data("NFLX", period="60d")
     # Run Backtest with Optimization
-    bt = Backtest(df, RsiSmaStrategy, cash=10000, commission=0.002)
+    bt = Backtest(df, RsiWmaBollingerStrategy, cash=10_000, commission=0.002)
+    # Run optimization
     optimized_stats = bt.optimize(
-        short_window=range(5, 20, 5), 
-        long_window=range(10, 50, 10),
-        rsi_period=range(10, 20, 1),
-        rsi_buy=range(20, 40, 10),
-        rsi_sell=range(60, 80, 10),
-        maximize=optimize_profit_with_limited_trades,  # Or any in-built metrics which appears in output
-        constraint=lambda params: params.short_window < params.long_window,  # Ensure valid SMA crossover
-       #return_heatmap=True
+        rsi_period=range(10, 21, 2),
+        rsi_buy=range(20, 40, 2),
+        rsi_sell=range(60, 80, 2),
+        bb_period=range(10, 31, 5),
+        bb_std=np.arange(1.5, 2.6, 0.1).tolist(),          # <- fix here
+        #stop_loss_pct=np.arange(0.01, 0.05, 0.01).tolist(), # <- and here
+        #take_profit_pct=np.arange(0.03, 0.10, 0.01).tolist(), # <- and here
+        maximize='Equity Final [$]',
+        constraint=lambda p: p.rsi_buy < p.rsi_sell
     )
 
     # Plot results of optimized strategy

@@ -6,22 +6,27 @@ from sklearn.preprocessing import MinMaxScaler
 import yfinance as yf
 import pandas as pd
 
-def get_stock_data(ticker="NVDA", interval="1d", start=None, end=None, period=None):
-    """
-    Fetch stock data with support for period or start/end dates.
+from datetime import datetime
 
-    :param ticker: Stock symbol (e.g., "NVDA")
-    :param interval: Candle interval (e.g., "1d", "1h", "15m", "5m")
-    :param start: Start date (e.g., "2023-01-01")
-    :param end: End date (e.g., "2024-01-01")
-    :param period: Period string (e.g., "30d", "60d", "1y"). Overrides start/end.
-    :return: Clean OHLCV DataFrame
-    """
-    # Intraday limit check
+def get_stock_data(ticker="NVDA", interval="1d", start=None, end=None, period=None):
     intraday_intervals = ["1m", "2m", "5m", "15m", "30m", "60m", "90m"]
-    if interval in intraday_intervals and not period:
-        # yfinance supports max 60 days for 5m/15m intervals
-        period = "30d"  # default fallback
+    
+    # Auto-convert date strings to datetime
+    if start and isinstance(start, str):
+        start = datetime.strptime(start, "%Y-%m-%d")
+    if end and isinstance(end, str):
+        end = datetime.strptime(end, "%Y-%m-%d")
+
+    # For intraday, limit range if using start/end
+    if interval in intraday_intervals:
+        if not period and start and end:
+            delta_days = (end - start).days
+            if delta_days > 60:
+                print(f"⚠️ Interval '{interval}' only supports ~60 days. Switching to last 60 days.")
+                period = "60d"
+                start = end = None
+        elif not period:
+            period = "30d"  # fallback default
 
     # Fetch data
     if period:
@@ -31,14 +36,13 @@ def get_stock_data(ticker="NVDA", interval="1d", start=None, end=None, period=No
 
     # Clean and standardize
     if df.empty:
-        raise ValueError(f"No data returned for {ticker} with interval {interval}")
+        raise ValueError(f"No data returned for {ticker} with interval '{interval}'")
+    if isinstance(df.columns, pd.MultiIndex):
+        df.columns = df.columns.get_level_values(0)
 
     df = df[["Open", "High", "Low", "Close", "Volume"]].copy()
     df.dropna(inplace=True)
-    df.columns = ["Open", "High", "Low", "Close", "Volume"]
-
     return df
-
 
 #%% 
 class StockPricePredictor:
