@@ -46,11 +46,10 @@ def get_stock_data(ticker="NVDA", interval="1d", start=None, end=None, period=No
 
 #%% 
 class StockPricePredictor:
-    def __init__(self, model_path="stock_esn_model.pkl", scaler_path="scaler_esn_model.pkl"):
+    def __init__(self, model_path, scaler_path):
         # Load the trained model
         with open(model_path, "rb") as f:
             self.model = pickle.load(f)
-        
         # Load the saved scaler
         with open(scaler_path, "rb") as f:
             self.scaler = pickle.load(f)
@@ -64,7 +63,6 @@ class StockPricePredictor:
         """Predicts the next day's close price given the last n_steps data."""
         x_input = self.preprocess_input(last_n_steps_df)
         y_pred_scaled = self.model.predict(x_input)
-        
         # Inverse transform (handling single feature case)
         y_pred_scaled_n = np.repeat(y_pred_scaled, 4, axis=1)
         y_pred = self.scaler.inverse_transform(y_pred_scaled_n)[:, 0]
@@ -72,8 +70,8 @@ class StockPricePredictor:
 # %%
 if __name__ == "__main__":
     # Load model & scaler
-    predictor = StockPricePredictor(model_path="stock_esn_model_7.pkl", 
-                                    scaler_path="scaler_esn_model_7.pkl")
+    predictor = StockPricePredictor(model_path="esnmodel_MSFT_4_15m_2021-01-01_2024-12-31", 
+                                    scaler_path="scaler_MSFT_4_15m_2021-01-01_2024-12-31")
     # Example input (last 4 days' data as a DataFrame)
     import pandas as pd
     example_data = pd.DataFrame({
