@@ -12,3 +12,4 @@ langchain-openai
 duckduckgo-search
 crewai[tools]
 alpaca-trade-api
+plotly
