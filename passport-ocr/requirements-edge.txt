@@ -1,7 +1,0 @@
-opencv-python-headless==4.11.0.86
-fastapi==0.115.6
-uvicorn==0.34.0
-numpy<2
-onnxruntime==1.19.2
-Pillow>=10,<12
-pycountry==24.6.1
