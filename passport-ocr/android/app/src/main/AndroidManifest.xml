@@ -1,0 +1,15 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <uses-permission android:name="android.permission.CAMERA" />
+    <uses-permission android:name="android.permission.NFC" />
+    <uses-feature android:name="android.hardware.nfc" android:required="false" />
+    <uses-feature android:name="android.hardware.camera" android:required="false" />
+    <application android:label="@string/app_name" android:icon="@drawable/ic_pageport" android:theme="@style/AppTheme" android:allowBackup="false" android:usesCleartextTraffic="false">
+        <activity android:name=".AboutActivity" android:exported="false" />
+        <activity android:name=".SavedScansActivity" android:exported="false" />
+        <activity android:name=".ChipActivity" android:exported="false" />
+        <activity android:name=".MainActivity" android:exported="true" />
+        <activity android:name=".HomeActivity" android:exported="true">
+            <intent-filter><action android:name="android.intent.action.MAIN"/><category android:name="android.intent.category.LAUNCHER"/></intent-filter>
+        </activity>
+    </application>
+</manifest>
