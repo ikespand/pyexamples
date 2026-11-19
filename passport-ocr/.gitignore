@@ -3,3 +3,12 @@ __pycache__
 ngrok.exe
 .DS_Store
 *.csv
+.venv/
+.local/
+sample_img/
+
+.tools/
+
+android/.gradle/
+android/**/build/
+android/local.properties
